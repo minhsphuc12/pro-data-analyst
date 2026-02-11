@@ -4,7 +4,7 @@ Verify database connections defined in .env.
 
 Usage:
   python verify_connections.py              # verify all configured DBs
-  python verify_connections.py SOURCE         # verify only LOS
+  python verify_connections.py SOURCE         # verify only SOURCE
   python verify_connections.py SOURCE_A SOURCE_B   # verify multiple
 
 Uses db_connector: only Oracle, MySQL, PostgreSQL, SQL Server are tested.

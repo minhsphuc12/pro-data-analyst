@@ -22,7 +22,7 @@ def main():
     alias = (sys.argv[1] if len(sys.argv) > 1 else "DWH").strip().upper()
     if not alias:
         print("Usage: python scripts/test_db.py <ALIAS>")
-        print("Example: python scripts/test_db.py LOS")
+        print("Example: python scripts/test_db.py DWH")
         return 1
     try:
         db_type = get_db_type(alias)
