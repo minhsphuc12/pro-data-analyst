@@ -288,9 +288,37 @@ def parse_file(filepath: str, use_cache: bool = True) -> list[dict]:
 # Search
 # ============================================================================
 
+def _file_matches_db(filepath: str, db: str | None) -> bool:
+    """
+    Check whether a documentation file should be searched for a given DB/system.
+
+    db:
+      - None       -> accept all files
+      - "DWH"      -> only DWH docs (dwh-meta-*)
+      - other name -> only source docs whose [source] matches db lowercased (pol, los, cif, ...)
+    """
+    if not db:
+        return True
+
+    db_norm = db.strip().lower()
+    doc_type, source_name = _doc_type_from_filename(Path(filepath).name)
+
+    if not doc_type:
+        return False
+
+    if db_norm == "dwh":
+        return doc_type.startswith("dwh_")
+
+    # For non-DWH aliases, match on source_name for source-system docs
+    if source_name and doc_type.startswith("source_"):
+        return source_name == db_norm
+
+    return False
+
+
 def search_documents(keyword: str, folder: str = "documents/",
                      use_cache: bool = True, use_regex: bool = False,
-                     limit: int = 200) -> list[dict]:
+                     limit: int = 200, db: str | None = None) -> list[dict]:
     """
     Search all Excel files in folder for keyword.
 
@@ -308,7 +336,9 @@ def search_documents(keyword: str, folder: str = "documents/",
     excel_files = []
     for f in os.listdir(abs_folder):
         if f.lower().endswith((".xlsx", ".xls")) and not f.startswith("~$"):
-            excel_files.append(os.path.join(abs_folder, f))
+            fp = os.path.join(abs_folder, f)
+            if _file_matches_db(fp, db):
+                excel_files.append(fp)
 
     if not excel_files:
         print(f"Không tìm thấy file Excel trong: {abs_folder}", file=sys.stderr)
@@ -456,13 +486,18 @@ if __name__ == "__main__":
     parser.add_argument("--no-cache", action="store_true", help="Disable caching")
     parser.add_argument("--regex", action="store_true", help="Use regex matching")
     parser.add_argument("--limit", type=int, default=200, help="Max results (default: 200)")
+    parser.add_argument(
+        "--db",
+        help="Limit docs to a specific system: DWH (warehouse), or source alias like POL, LOS, CIF, ...",
+    )
     parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
     args = parser.parse_args()
 
     try:
         results = search_documents(
             keyword=args.keyword, folder=args.folder,
-            use_cache=not args.no_cache, use_regex=args.regex, limit=args.limit,
+            use_cache=not args.no_cache, use_regex=args.regex,
+            limit=args.limit, db=args.db,
         )
         if args.format == "json":
             print(format_json(results))

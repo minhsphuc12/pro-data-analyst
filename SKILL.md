@@ -7,7 +7,7 @@ description: >
   analysis through data discovery, query design, testing, optimization, to documented output.
 license: MIT
 metadata:
-  version: "2.2.0"
+  version: "2.3.0"
   domain: data-analytics
   triggers: >
     data analysis, SQL query, business report, find tables, DWH query, data warehouse,
@@ -83,20 +83,34 @@ or "I trust the tables, skip CP2") — honor the specific request and keep the r
 
 ### Phase 1: Requirement Analysis & Goal Setting
 
-Before touching any data, clearly define:
+Before touching any data, clearly define the problem and **enrich it with business glossary** so Phase 2 data discovery is targeted and aligned with standard definitions.
 
 1. **Business question**: What is the user really asking? Restate it precisely.
 2. **Output definition**: What should the result look like? (columns, rows, format)
 3. **Data modules**: Break into logical data domains (e.g., "customer data", "transaction data")
 4. **Data elements needed**: List specific measures (SUM, COUNT, AVG) and dimensions (GROUP BY)
 5. **Filters & scope**: Time range, business unit, status filters, etc.
-6. **Save brief**: Create `{task-name}/{task-name}-brief.md` in the working directory with {task-name} have is in clear readable format, and have date first to easily sort and locate later.
+6. **Consult Business Glossary** (before finalizing the brief):  
+   Search the business glossary for **key terms and KPIs** mentioned in the question (tên chỉ tiêu, thuật ngữ). This clarifies definitions, calculation methods, and points to DWH tables/columns *before* you search docs/schema.
+   ```bash
+   python @scripts/search_glossary.py --keyword "your term or KPI" --folder documents/
+   ```
+   Use glossary results to:
+   - **Định nghĩa**: Standard definition of the term — include in brief so the problem is unambiguous.
+   - **Cách tính**: Calculation method — use to validate or draft the expected logic.
+   - **Bảng/Trường dữ liệu DWH, SQL tính toán**: Suggested DWH table/column and SQL snippet — note these as candidates for Phase 2 (do not assume they are the only source; still run data discovery and confirm).
+   - **Domain, Đơn vị sở hữu**: Helps scope and ownership.
+   Enrich the task brief with these so the problem is stated in business language and Phase 2 discovery is more effective.
+7. **Save brief**: Create `{task-name}/{task-name}-brief.md` in the working directory with {task-name} in clear readable format, and have date first to easily sort and locate later.
 
 **Template for brief:**
 ```markdown
 # Task: {task name}
 ## Business Question
 {restate the question}
+## Glossary / Standard Definitions (from business glossary, if found)
+- **{term 1}**: {Định nghĩa}. Cách tính: {Cách tính}. DWH: {Bảng/Trường} (candidate for Phase 2).
+- ...
 ## Expected Output
 | Column | Description | Source |
 |--------|-------------|--------|
@@ -462,6 +476,7 @@ Load detailed guidance based on context:
 | `@scripts/check_table.py` | Inspect table structure + comments | `python @scripts/check_table.py SCHEMA TABLE --db DWH` |
 | `@scripts/search_schema.py` | Search DB metadata by name/comment | `python @scripts/search_schema.py -k "keyword" --db DWH` |
 | `@scripts/search_documents.py` | Search Excel docs (DWH + source meta) | `python @scripts/search_documents.py -k "keyword" --folder documents/` |
+| `@scripts/search_glossary.py` | Search business glossary (terms, definitions, DWH mapping) | `python @scripts/search_glossary.py -k "keyword" --folder documents/` |
 | `@scripts/explain_query.py` | Run EXPLAIN PLAN | `python @scripts/explain_query.py --db DWH --file q.sql` |
 | `@scripts/run_query_safe.py` | Execute with safety limits | `python @scripts/run_query_safe.py --db DWH --file q.sql` |
 | `@scripts/find_relationships.py` | Find FK / join paths | `python @scripts/find_relationships.py -s SCHEMA -t TABLE` |
@@ -490,6 +505,7 @@ Default alias: `DWH` (Oracle datawarehouse)
 documents/      -> Excel metadata (DWH + source systems). Chuẩn khai thác:
   dwh-meta-tables.xlsx, dwh-meta-columns.xlsx  -> DWH (bảng/cột tích hợp)
   [source]-meta-tables.xlsx, [source]-meta-columns.xlsx -> Từ điển từng hệ thống nguồn (cif, appraisal, ...)
+  *glossary*.xlsx, *bg-*.xlsx (business glossary) -> Thuật ngữ, định nghĩa, cách tính, Bảng/Trường DWH, SQL tính toán (dùng trong Phase 1)
 queries/        -> Existing SQL queries (reference for patterns)
 queries/agent-written/  -> Output: queries written by this agent
 references/     -> SQL and DWH reference guides
@@ -505,6 +521,7 @@ scripts/        -> Python tools for database inspection and query testing
 - Incorporate user feedback / domain knowledge when provided at checkpoints
 - Re-present and re-confirm if user corrections are significant
 - Create task brief before data discovery (Phase 1)
+- In Phase 1, consult business glossary for key terms/KPIs to enrich the brief (definitions, calculation, DWH candidates) before Phase 2
 - Search BOTH documents/ (DWH + source docs when relevant) AND database metadata for data discovery (Phase 2)
 - Document data mapping before writing query (Phase 3)
 - Write CTEs with inline comments explaining reasoning (Phase 4)
