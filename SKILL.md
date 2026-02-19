@@ -333,6 +333,7 @@ Write the query following these principles:
 - Apply **early filtering** (especially partition keys)
 - Handle **NULLs** explicitly
 - Use **set-based operations** (never cursors)
+- **PII**: Do **not** put columns that are or may be personally identifiable information (PII) in the SELECT list as direct output columns. If PII is needed for analytics, use only **aggregation functions** (e.g. `COUNT(*)`, `COUNT(DISTINCT col)`, `MIN`/`MAX` for grouping). Use DWH/source metadata (e.g. CDE/PII in `dwh-meta-columns.xlsx`) to identify PII columns.
 
 **Query structure template:**
 ```sql
@@ -568,11 +569,13 @@ multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {
 - Handle NULLs explicitly in all comparisons
 - Apply partition pruning on partitioned tables
 - Use column comments to understand business meaning of data
+- **PII in queries**: Before executing any SQL, ensure no column that is or may be PII (e.g. name, email, phone, ID number, address; or columns marked CDE/PII in metadata) appears in the SELECT list as a direct column. If analytics need PII, use only aggregations (e.g. `COUNT(*)`, `COUNT(DISTINCT col)`).
 
 ### MUST NOT DO
 - **Proceed past any [CHECKPOINT] without explicit user approval**
 - **Assume tables/columns/filters are correct without user confirmation**
 - **Ignore user-provided domain knowledge or corrections at checkpoints**
+- **Execute SQL that selects columns that are or may be PII** (e.g. name, email, phone, national ID, address, or columns marked CDE/PII in metadata) **as direct result columns**. PII may appear only inside aggregation functions (e.g. `COUNT(email)`, `COUNT(DISTINCT customer_id)`); raw PII must not be returned in the result set.
 - Jump straight to writing SQL without understanding data first
 - Skip EXPLAIN PLAN analysis
 - Execute queries without row limits during testing
