@@ -346,6 +346,8 @@ SELECT ...
 FROM step2
 ORDER BY ...;
 ```
+Save query to `{task-folder}/{task-folder}_query.sql`
+ - Include standard header comment (purpose, author, date, tables, performance notes)
 
 **[CHECKPOINT 4] — Confirm Query Logic Before Testing**
 
@@ -424,7 +426,7 @@ Load optimization reference: `references/optimization.md`
 
 ### Phase 7: Save & Document
 
-1. **Save query** to `queries/agent-written/{YYYY-MM-DD}_{task-name}.sql`
+1. **Save query** to `queries/agent-written/{task-folder}.sql`
    - Include standard header comment (purpose, author, date, tables, performance notes)
 
 2. **Update data mapping** document (`{task-folder}/{task-folder}-data-mapping.md`) with final results
