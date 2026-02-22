@@ -19,9 +19,10 @@ metadata:
   output-format: sql + documentation
 ---
 
-**Key differentiator**: You do NOT jump straight to writing SQL. You first understand the data
-landscape by searching documentation, database comments, and prior queries before designing
-any solution.
+**Key differentiator**: You do NOT jump straight to writing SQL. Before executing a new task,
+**consult the knowledge folders** (`single-table/`, `multiple-tables/`) for accumulated data
+understanding from previous tasks — then understand the data landscape by searching documentation,
+database comments, and prior queries before designing any solution.
 
 ## When to Use This Skill
 
@@ -56,17 +57,31 @@ After Phase 1 → **[CHECKPOINT 1]**; after Phase 2 → **[CHECKPOINT 2]**; afte
 
 Load detailed guidance based on context:
 
+**Workflow phases & checkpoints:**
+
 | Topic | Reference | Load When |
 |-------|-----------|-----------|
 | Checkpoints & skip mode | `references/checkpoints.md` | Checkpoint rules, skip mode, partial skip |
-| Workflow Phase 1–7 + checkpoints | `references/workflow-phase-N.md` | Executing Phase N (N = 1..7) |
+| Phase 1 | `references/workflow-phase-1.md` | Requirement analysis, brief, business glossary |
+| Phase 2 | `references/workflow-phase-2.md` | Data discovery — docs, schema, prior queries |
+| Phase 3 | `references/workflow-phase-3.md` | Data mapping & documentation |
+| Phase 4 | `references/workflow-phase-4.md` | Query design, CTEs, PII, template |
+| Phase 5 | `references/workflow-phase-5.md` | Query testing — EXPLAIN PLAN, safe execution |
+| Phase 6 | `references/workflow-phase-6.md` | Optimization — partition, index, hints |
+| Phase 7 | `references/workflow-phase-7.md` | Save & document — query, report, knowledge, security |
+
+**Other references:**
+
+| Topic | Reference | Load When |
+|-------|-----------|-----------|
 | Query Patterns | `references/query-patterns.md` | JOINs, CTEs, subqueries, recursive queries |
 | Window Functions | `references/window-functions.md` | ROW_NUMBER, RANK, LAG/LEAD, analytics |
 | Optimization | `references/optimization.md` | EXPLAIN plans, indexes, statistics, tuning |
 | Database Design | `references/database-design.md` | Normalization, keys, constraints, schemas |
 | Dialect Differences | `references/dialect-differences.md` | Oracle vs MySQL vs PostgreSQL specifics |
 | DWH Patterns | `references/dwh-patterns.md` | Star schema, SCD, ETL, fact/dimension patterns |
-| Table/join knowledge | `single-table/{db}_{schema}_{table}.md`, `multiple-tables/{db}_{t1}_{t2}….md` | Before querying a table or join, check if a knowledge file exists and load it for context |
+| Knowledge folder (accumulated learnings) | `knowledge/single-table/`, `knowledge/multiple-tables/` | **Before executing a new task**: scan/load relevant files for tables and joins from past tasks to reuse context |
+| Table/join knowledge | `knowledge/single-table/{db}_{schema}_{table}.md`, `knowledge/multiple-tables/{db}_{t1}_{t2}….md` | When a table or join is in scope, load the matching knowledge file if it exists for context |
 
 ## Scripts Reference
 
@@ -111,13 +126,14 @@ queries/        -> Existing SQL queries (reference for patterns)
 queries/agent-written/  -> Output: queries written by this agent (naming: {YYYY-MM-DD}_{task-name}.sql)
 references/     -> SQL and DWH reference guides
 scripts/        -> Python tools for database inspection and query testing
-single-table/   -> Knowledge base: one file per table. Naming: {source_db}_{schema}_{table}.md. Accumulate learnings across sessions.
-multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {source_db}_{table1}_{table2}[_{table3}…].md. Accumulate learnings across sessions.
+knowledge/single-table/   -> Knowledge base: one file per table. Naming: {source_db}_{schema}_{table}.md. Accumulate learnings across sessions. **Consult at the start of a new task** for relevant tables.
+knowledge/multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {source_db}_{table1}_{table2}[_{table3}…].md. Accumulate learnings across sessions. **Consult at the start of a new task** for relevant joins.
 ```
 
 ## Constraints
 
 ### MUST DO
+- **Before executing a new task**: Consult the knowledge folders (`single-table/`, `multiple-tables/`) for accumulated data understanding from previous tasks — check for files matching tables/joins relevant to the task and load them for context before Phase 1–2.
 - Follow the 7-phase workflow in order
 - **STOP at every [CHECKPOINT] and wait for user confirmation before proceeding**
 - Present clear summaries at each checkpoint with structured questions
@@ -126,7 +142,7 @@ multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {
 - Create task brief before data discovery (Phase 1)
 - Use date prefix **{YYYY-MM-DD}_** for any file or folder named with task-name (e.g. `{YYYY-MM-DD}_{task-name}/`, `{YYYY-MM-DD}_{task-name}-brief.md`) so outputs are easy to sort and find
 - In Phase 1, consult business glossary for key terms/KPIs to enrich the brief (definitions, calculation, DWH candidates) before Phase 2
-- Search BOTH documents/ (DWH + source docs when relevant) AND database metadata for data discovery (Phase 2)
+- Search BOTH documents/ (DWH + source docs when relevant) AND database metadata for data discovery (Phase 2); when tables or joins are in scope, load matching knowledge files from `single-table/` and `multiple-tables/` if they exist
 - Document data mapping before writing query (Phase 3)
 - Write CTEs with inline comments explaining reasoning (Phase 4)
 - Run EXPLAIN PLAN before executing query (Phase 5)
