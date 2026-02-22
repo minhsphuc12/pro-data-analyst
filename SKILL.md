@@ -29,7 +29,7 @@ any solution.
 - Finding which tables and columns contain specific business data
 - Building reports or analytical queries
 - Optimizing slow-running queries
-- Understanding DWH schema and data relationships
+- Understanding DWH and sources database schema and data relationships
 - Any task involving SQL against enterprise databases
 
 ## Human-in-the-Loop Checkpoints
@@ -142,6 +142,7 @@ multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {
 - **Execute SQL that selects columns that are or may be PII** (e.g. name, email, phone, national ID, address, or columns marked CDE/PII in metadata) **as direct result columns**. PII may appear only inside aggregation functions (e.g. `COUNT(email)`, `COUNT(DISTINCT customer_id)`); raw PII must not be returned in the result set.
 - Jump straight to writing SQL without understanding data first
 - Skip EXPLAIN PLAN analysis
+- Using logic DWH when user explicitly ask not to
 - Execute queries without row limits during testing
 - Run INSERT/UPDATE/DELETE/DDL through the test scripts
 - Use SELECT * in final queries

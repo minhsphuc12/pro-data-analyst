@@ -1,6 +1,6 @@
 # Phase 1: Requirement Analysis & Goal Setting
 
-Before touching any data, clearly define the problem and **enrich it with business glossary** so Phase 2 data discovery is targeted and aligned with standard definitions.
+Before touching any data, clearly define the problem and **enrich it with business glossary** so that Phase 2 data discovery is targeted and aligned with standard definitions.
 
 1. **Business question**: What is the user really asking? Restate it precisely.
 2. **Output definition**: What should the result look like? (columns, rows, format)
@@ -8,17 +8,17 @@ Before touching any data, clearly define the problem and **enrich it with busine
 4. **Data elements needed**: List specific measures (SUM, COUNT, AVG) and dimensions (GROUP BY)
 5. **Filters & scope**: Time range, business unit, status filters, etc.
 6. **Consult Business Glossary** (before finalizing the brief):  
-   Search the business glossary for **key terms and KPIs** mentioned in the question (tên chỉ tiêu, thuật ngữ). This clarifies definitions, calculation methods, and points to DWH tables/columns *before* you search docs/schema.
+   Search the business glossary for **key terms and KPIs** mentioned in the question (indicator name, terminology). This clarifies definitions, calculation methods, and points to DWH tables/columns *before* you search docs/schema.
    ```bash
    python @scripts/search_glossary.py --keyword "your term or KPI" --folder documents/
    ```
    Use glossary results to:
-   - **Định nghĩa**: Standard definition of the term — include in brief so the problem is unambiguous.
-   - **Cách tính**: Calculation method — use to validate or draft the expected logic.
-   - **Bảng/Trường dữ liệu DWH, SQL tính toán**: Suggested DWH table/column and SQL snippet — note these as candidates for Phase 2 (do not assume they are the only source; still run data discovery and confirm).
-   - **Domain, Đơn vị sở hữu**: Helps scope and ownership.
+   - **Definition**: Standard definition of the term — include in the brief so the problem is unambiguous.
+   - **Calculation method**: Use this to validate or draft the expected logic.
+   - **DWH table/column, calculation SQL**: Suggested DWH table/column and SQL snippet — note these as candidates for Phase 2 (do not assume they are the only source; still run data discovery and confirm).
+   - **Domain, Owning Unit**: Helps with scoping and identifying ownership.
    Enrich the task brief with these so the problem is stated in business language and Phase 2 discovery is more effective.
-7. **Save brief**: Create `{task-name}/{task-name}-brief.md` in the working directory with {task-name} in clear readable format, and have date first to easily sort and locate later.
+7. **Save brief**: Create `{task-name}/{task-name}-brief.md` in the working directory with {task-name} in a clear, readable format, and have date first to easily sort and locate later.
 
 ## Template for brief
 
@@ -27,7 +27,7 @@ Before touching any data, clearly define the problem and **enrich it with busine
 ## Business Question
 {restate the question}
 ## Glossary / Standard Definitions (from business glossary, if found)
-- **{term 1}**: {Định nghĩa}. Cách tính: {Cách tính}. DWH: {Bảng/Trường} (candidate for Phase 2).
+- **{term 1}**: {Definition}. Calculation method: {Calculation method}. DWH: {Table/Field} (candidate for Phase 2).
 - ...
 ## Expected Output
 | Column | Description | Source |
@@ -63,6 +63,9 @@ Before touching any data, clearly define the problem and **enrich it with busine
 
 4. **Any domain knowledge to share?** (free-text, optional)
    - Known table names, column names, business rules, or gotchas that would help
+
+5. **Where should the data be extracted from?**
+   - Is the data source exclusively DWH, source databases, or do we need both? (If unclear, please specify.)
 
 **Format:** Present a clear summary of Phase 1 output, then ask the questions above.
 If the user provides corrections, update the brief and re-confirm if changes are significant.
