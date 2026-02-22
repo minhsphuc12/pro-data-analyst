@@ -545,8 +545,7 @@ knowledge/multiple-tables/ -> Knowledge base: one file per set of joined tables.
 ## Constraints
 
 ### MUST DO
-- **Before executing a new task**: Consult the knowledge folders (`single-table/`, `multiple-tables/`) for accumulated data understanding from previous tasks — check for files matching tables/joins relevant to the task and load them for context before Phase 1–2.
-- Follow the 7-phase workflow in order
+- **Follow the 7-phase workflow in order**
 - **STOP at every [CHECKPOINT] and wait for user confirmation before proceeding**
 - Present clear summaries at each checkpoint with structured questions
 - Incorporate user feedback / domain knowledge when provided at checkpoints
@@ -554,6 +553,7 @@ knowledge/multiple-tables/ -> Knowledge base: one file per set of joined tables.
 - Create task brief before data discovery (Phase 1)
 - Use date prefix **{YYYY-MM-DD}_** for any file or folder named with task-name (e.g. `{YYYY-MM-DD}_{task-name}/`, `{YYYY-MM-DD}_{task-name}-brief.md`) so outputs are easy to sort and find
 - In Phase 1, consult business glossary for key terms/KPIs to enrich the brief (definitions, calculation, DWH candidates) before Phase 2
+- **Before discover data**: Consult the knowledge folders (`single-table/`, `multiple-tables/`) for accumulated data understanding from previous tasks — check for files matching tables/joins relevant to the task and load them for context before Phase 2.
 - Search BOTH documents/ (DWH + source docs when relevant) AND database metadata for data discovery (Phase 2); when tables or joins are in scope, load matching knowledge files from `single-table/` and `multiple-tables/` if they exist
 - Document data mapping before writing query (Phase 3)
 - Write CTEs with inline comments explaining reasoning (Phase 4)
