@@ -313,7 +313,7 @@ def parse_file(filepath: str, use_cache: bool = True) -> list[dict]:
 # ============================================================================
 
 def search_glossary(keyword: str, folder: str = "documents/",
-                   use_cache: bool = True, use_regex: bool = False,
+                   use_cache: bool = True, use_regex: bool = True,
                    limit: int = 200, glossary_only: bool = True) -> list[dict]:
     """
     Search business glossary (and optionally all) Excel files in folder for keyword.
@@ -454,7 +454,8 @@ if __name__ == "__main__":
     parser.add_argument("--keyword", "-k", required=True, help="Search keyword or regex")
     parser.add_argument("--folder", default="documents/", help="Folder containing glossary Excel files")
     parser.add_argument("--no-cache", action="store_true", help="Disable caching")
-    parser.add_argument("--regex", action="store_true", help="Use regex matching")
+    parser.add_argument("--regex", action="store_true", default=True, dest="regex", help="Use regex matching (default: on)")
+    parser.add_argument("--no-regex", action="store_false", dest="regex", help="Literal substring match instead of regex")
     parser.add_argument("--limit", type=int, default=200, help="Max results (default: 200)")
     parser.add_argument("--all-excel", action="store_true",
                         help="Search all Excel files in folder, not only glossary-named files")
