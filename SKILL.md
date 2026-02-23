@@ -85,9 +85,10 @@ Before touching any data, clearly define the problem and **enrich it with busine
 5. **Data elements needed**: List specific measures (SUM, COUNT, AVG) and dimensions (GROUP BY)
 6. **Filters & scope**: Time range, business unit, status filters, etc.
 7. **Consult Business Glossary** (before finalizing the brief):  
-   Search the business glossary for **key terms and KPIs** mentioned in the question (indicator name, terminology). This clarifies definitions, calculation methods, and points to DWH tables/columns *before* you search docs/schema.
+   Search the business glossary for **key terms and KPIs** mentioned in the question (indicator name, terminology). This clarifies definitions, calculation methods, and points to DWH tables/columns *before* you search docs/schema. To search several terms in one call, use regex OR: `--keyword "term1|term2|KPI name"` (regex is on by default).
    ```bash
    python @scripts/search_glossary.py --keyword "your term or KPI" --folder documents/
+   python @scripts/search_glossary.py --keyword "doanh thu|revenue|AMOUNT" --folder documents/
    ```
    Use glossary results to:
    - **Definition**: Standard definition of the term — include in the brief so the problem is unambiguous.
@@ -150,18 +151,21 @@ Only proceed to Phase 2 after explicit approval.
 
 ### Phase 2: Data Discovery
 
-Search **three sources in parallel** to find relevant tables and columns:
+Search **three sources in parallel** to find relevant tables and columns.
+
+**Searching multiple terms at once:** All search scripts (`search_glossary`, `search_documents`, `search_schema`) use **regex by default**. To find any of several terms in one run, use `|` (OR): e.g. `--keyword "doanh thu|revenue|amount"`. Use `--no-regex` only when you need a single literal substring match.
 
 **2a. Search Excel Documentation**
 
 ```bash
 python @scripts/search_documents.py --keyword "your keyword" --folder documents/
+python @scripts/search_documents.py --keyword "TERM_X|TERM_Y|TERM_Z" --folder documents/
 ```
 
 The `documents/` folder contains **two types** of standardized Excel metadata; search here first and use the right type for the task:
 
 - **DWH metadata** (data warehouse — consolidated from all sources):
-  - `dwh-meta-tables.xlsx`: DWH table (Table Name, Table Description, Schema, Source, Domain, DIM/FACT/RPT classification, …)
+  - `dwh-meta-tables.xlsx`: DWH tables (Table Name, Table Description, Schema, Source, Domain, DIM/FACT/RPT classification, …)
   - `dwh-meta-columns.xlsx`: DWH columns (Table Name, Field Name, Description, Data Type, Mapping Rule, CDE/PII, …)
   Use when the question is about **tables/columns in the DWH** (reporting, KPI, join in DWH).
 
@@ -176,6 +180,7 @@ Search results will contain `doc_type` (dwh_tables, dwh_columns, source_tables, 
 
 ```bash
 python @scripts/search_schema.py --keyword "your keyword" --db DWH
+python @scripts/search_schema.py --keyword "LOAN_SCH|LOAN_DTL|customer" --db DWH
 python @scripts/search_schema.py --keyword "your keyword" --search-in comments --schema OWNER
 ```
 
@@ -506,9 +511,9 @@ Load detailed guidance based on context:
 | Script | Purpose | Key Usage |
 |--------|---------|-----------|
 | `@scripts/check_table.py` | Inspect table structure + comments | `python @scripts/check_table.py SCHEMA TABLE --db DWH` |
-| `@scripts/search_schema.py` | Search DB metadata by name/comment | `python @scripts/search_schema.py -k "keyword" --db DWH` |
-| `@scripts/search_documents.py` | Search Excel docs (DWH + source meta) | `python @scripts/search_documents.py -k "keyword" --folder documents/` |
-| `@scripts/search_glossary.py` | Search business glossary (terms, definitions, DWH mapping) | `python @scripts/search_glossary.py -k "keyword" --folder documents/` |
+| `@scripts/search_schema.py` | Search DB metadata by name/comment (regex default; use `\|` for multi-term) | `python @scripts/search_schema.py -k "keyword" --db DWH` — multi-term: `-k "LOAN_SCH\|LOAN_DTL"` |
+| `@scripts/search_documents.py` | Search Excel docs (DWH + source meta); regex default | `python @scripts/search_documents.py -k "keyword" --folder documents/` — multi-term: `-k "term1\|term2"` |
+| `@scripts/search_glossary.py` | Search business glossary (terms, definitions, DWH mapping); regex default | `python @scripts/search_glossary.py -k "keyword" --folder documents/` — multi-term: `-k "term1\|term2"` |
 | `@scripts/explain_query.py` | Run EXPLAIN PLAN | `python @scripts/explain_query.py --db DWH --file q.sql` |
 | `@scripts/run_query_safe.py` | Execute with safety limits | `python @scripts/run_query_safe.py --db DWH --file q.sql` |
 | `@scripts/find_relationships.py` | Find FK / join paths | `python @scripts/find_relationships.py -s SCHEMA -t TABLE` |
