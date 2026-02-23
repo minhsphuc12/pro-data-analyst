@@ -13,6 +13,8 @@ Usage:
     python search_procedures.py --text "COMMIT" --type PACKAGE BODY --format json
     python search_procedures.py --table CUST --regex --limit 50
     python search_procedures.py --table X --show-query   # print SQL to stderr to debug no results
+    python search_procedures.py --name DWHPROD.PKG_DIM_CUSTOMER   # fetch by object name
+    python search_procedures.py --name PKG_DIM_CUSTOMER --schema DWHPRD
 """
 
 import argparse
@@ -97,6 +99,58 @@ def _print_query_debug(sql: str, params: dict, stream=None):
     stream.write(executable.strip())
     stream.write("\n\n")
     stream.flush()
+
+
+def _oracle_fetch_by_name(
+    cursor,
+    object_name: str,
+    object_owner: str | None,
+    object_types: list[str],
+    limit_lines_per_object: int,
+    show_query: bool = False,
+) -> list[dict]:
+    """
+    Fetch full source for procedure/package/function by exact name (and optional owner).
+    """
+    valid_types = ["PROCEDURE", "PACKAGE", "PACKAGE BODY", "FUNCTION"]
+    types_to_use = [t for t in object_types if t in valid_types] or valid_types
+    placeholders = ", ".join(f":typ{i}" for i in range(len(types_to_use)))
+    params: dict = {f"typ{i}": t for i, t in enumerate(types_to_use)}
+    params["objname"] = object_name.strip().upper()
+
+    sql = f"""
+        SELECT OWNER, NAME, TYPE, LINE, TEXT
+        FROM ALL_SOURCE
+        WHERE NAME = :objname
+          AND TYPE IN ({placeholders})
+    """
+    if object_owner:
+        sql += " AND OWNER = :owner"
+        params["owner"] = object_owner.strip().upper()
+    sql += " ORDER BY OWNER, NAME, TYPE, LINE"
+
+    if show_query:
+        _print_query_debug(sql, params)
+
+    cursor.execute(sql, params)
+    by_key: dict[tuple, list[dict]] = defaultdict(list)
+    for row in cursor:
+        owner, name, otype, line, text = row[0], row[1], row[2], row[3], row[4] or ""
+        by_key[(owner, name, otype)].append({"line": line, "text": text.rstrip()})
+
+    results = []
+    for (owner, name, otype), full_lines in sorted(by_key.items(), key=lambda x: (x[0][0], x[0][1], x[0][2])):
+        if limit_lines_per_object > 0 and len(full_lines) > limit_lines_per_object:
+            full_lines = full_lines[: limit_lines_per_object]
+        results.append({
+            "schema": owner,
+            "name": name,
+            "type": otype,
+            "match_count": 0,
+            "matching_line_numbers": [],
+            "lines": full_lines,
+        })
+    return results
 
 
 def _oracle_search_procedures(
@@ -223,6 +277,7 @@ def _oracle_search_procedures(
 def search_procedures(
     table_name: str | None = None,
     text_content: str | None = None,
+    object_name: str | None = None,
     db_alias: str = "DWH_ADMIN",
     schema: str | None = None,
     object_types: list[str] | None = None,
@@ -232,15 +287,16 @@ def search_procedures(
     show_query: bool = False,
 ) -> list[dict]:
     """
-    Find procedure/package/function in DWH containing a table name or string.
+    Find procedure/package/function in DWH by table/text in source, or fetch directly by object name.
 
     Only supports Oracle. If db_alias is not Oracle, raises ValueError.
 
     Args:
         table_name: Table name to search in source (e.g. DIM_CUSTOMER).
         text_content: Any string to search in source (e.g. "INSERT INTO", "COMMIT").
+        object_name: Fetch by exact object name (e.g. PKG_FOO or SCHEMA.PKG_FOO). Overrides table/text.
         db_alias: Connection alias (default DWH).
-        schema: Filter by owner/schema.
+        schema: Filter by owner/schema (or owner when object_name is SCHEMA.NAME).
         object_types: Object types (PROCEDURE, PACKAGE, PACKAGE BODY, FUNCTION). Default is all.
         use_regex: If True, table_name and text_content are treated as regex.
         limit_objects: Maximum number of objects to return.
@@ -259,6 +315,22 @@ def search_procedures(
 
     with get_connection(db_alias) as conn:
         cursor = conn.cursor()
+        if object_name:
+            # Direct fetch by name: "SCHEMA.NAME" or "NAME" (optionally with --schema)
+            obj = object_name.strip()
+            if "." in obj:
+                object_owner, obj_name = obj.split(".", 1)
+            else:
+                object_owner = schema
+                obj_name = obj
+            return _oracle_fetch_by_name(
+                cursor,
+                object_name=obj_name,
+                object_owner=object_owner,
+                object_types=object_types,
+                limit_lines_per_object=limit_lines_per_object,
+                show_query=show_query,
+            )
         return _oracle_search_procedures(
             cursor,
             table_name=table_name,
@@ -281,9 +353,12 @@ def format_text(results: list[dict]) -> str:
         return "No matching procedure/package found."
 
     lines = []
-    lines.append(f"Found {len(results)} matching objects (full source below):\n")
+    lines.append(f"Found {len(results)} object(s) (full source below):\n")
     for r in results:
-        lines.append(f"  [{r['type']}] {r['schema']}.{r['name']}  ({r['match_count']} lines reference search term)")
+        if r.get("match_count", 0) > 0:
+            lines.append(f"  [{r['type']}] {r['schema']}.{r['name']}  ({r['match_count']} lines reference search term)")
+        else:
+            lines.append(f"  [{r['type']}] {r['schema']}.{r['name']}")
         source = "\n".join(ln["text"] for ln in r["lines"])
         lines.append(source)
         lines.append("")
@@ -300,7 +375,10 @@ def format_markdown(results: list[dict]) -> str:
 
     out = [f"Found **{len(results)}** matching objects (full source).\n"]
     for r in results:
-        out.append(f"### `{r['schema']}.{r['name']}` ({r['type']}) — {r['match_count']} lines reference search term\n")
+        if r.get("match_count", 0) > 0:
+            out.append(f"### `{r['schema']}.{r['name']}` ({r['type']}) — {r['match_count']} lines reference search term\n")
+        else:
+            out.append(f"### `{r['schema']}.{r['name']}` ({r['type']})\n")
         out.append("```")
         source = "\n".join(ln["text"] for ln in r["lines"])
         out.append(source)
@@ -319,6 +397,8 @@ if __name__ == "__main__":
     parser.add_argument("--table", "-t", default=None, help="Table name to search in source (e.g. DIM_CUSTOMER)")
     parser.add_argument("--text", "-e", default=None, dest="text_content",
                         help="Any string to search in source (e.g. INSERT INTO, COMMIT)")
+    parser.add_argument("--name", "-n", default=None, dest="object_name",
+                        help="Fetch by object name (e.g. PKG_FOO or SCHEMA.PKG_FOO)")
     parser.add_argument("--db", default="DWH_ADMIN", help="Database alias (default: DWH)")
     parser.add_argument("--schema", "-s", default=None, help="Filter by owner/schema")
     parser.add_argument("--type", dest="object_types", default="PROCEDURE,PACKAGE,PACKAGE BODY,FUNCTION",
@@ -333,8 +413,8 @@ if __name__ == "__main__":
                         help="Output format")
     args = parser.parse_args()
 
-    if not args.table and not args.text_content:
-        parser.error("Need at least one of --table or --text.")
+    if not args.table and not args.text_content and not args.object_name:
+        parser.error("Need at least one of --table, --text, or --name.")
 
     object_types = [s.strip().upper() for s in args.object_types.split(",") if s.strip()]
 
@@ -342,6 +422,7 @@ if __name__ == "__main__":
         results = search_procedures(
             table_name=args.table or None,
             text_content=args.text_content or None,
+            object_name=args.object_name or None,
             db_alias=args.db,
             schema=args.schema or None,
             object_types=object_types,
