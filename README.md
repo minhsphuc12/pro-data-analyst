@@ -1,17 +1,17 @@
-# Pro Data Analyst Skill
+# Pro Data Analysis Skill
 
-Senior data analyst và SQL engineer chuyên về enterprise data warehouses. Chuyển đổi câu hỏi kinh doanh thành các truy vấn SQL được tối ưu hóa và có tài liệu đầy đủ thông qua quy trình làm việc có hệ thống 7 giai đoạn.
+Senior data analyst and SQL engineer specializing in enterprise data warehouses. Translates business questions into fully documented, optimized SQL queries through a systematic 7-stage workflow.
 
-## Tính năng
+## Features
 
-- ✅ **Hỗ trợ đa database**: Oracle, MySQL, PostgreSQL, SQL Server
-- 🔍 **Data Discovery**: Tìm kiếm tables/columns qua metadata và comments
-- 📊 **Query Optimization**: Phân tích EXPLAIN plans và tối ưu hóa performance
-- ✅ **Safety First**: Tất cả queries được chạy với limits và timeouts
-- 📝 **Tài liệu đầy đủ**: Mỗi query đều có comments và documentation
-- 🤝 **Human-in-the-Loop**: Checkpoints để xác nhận với user trước khi tiến hành
+- ✅ **Multi-database support**: Oracle, MySQL, PostgreSQL, SQL Server
+- 🔍 **Data Discovery**: Search for tables/columns via metadata and comments
+- 📊 **Query Optimization**: Analyze EXPLAIN plans and optimize performance
+- ✅ **Safety First**: All queries are executed with limits and timeouts
+- 📝 **Full Documentation**: Every query includes comments and documentation
+- 🤝 **Human-in-the-Loop**: Checkpoints for user confirmation before proceeding
 
-## Yêu cầu hệ thống
+## System Requirements
 
 ### Python Packages
 
@@ -19,56 +19,56 @@ Senior data analyst và SQL engineer chuyên về enterprise data warehouses. Ch
 # Core dependencies
 pip install python-dotenv
 
-# Database drivers (chọn theo database bạn sử dụng)
-pip install oracledb              # Cho Oracle
-pip install mysql-connector-python # Cho MySQL
-pip install psycopg2-binary       # Cho PostgreSQL
-pip install pyodbc                # Cho SQL Server
+# Database drivers (choose according to the database you use)
+pip install oracledb               # For Oracle
+pip install mysql-connector-python # For MySQL
+pip install psycopg2-binary        # For PostgreSQL
+pip install pyodbc                 # For SQL Server
 
-# Optional (cho Excel document search)
+# Optional (for Excel document search)
 pip install openpyxl pandas
 ```
 
 ### SQL Server - ODBC Driver
 
-SQL Server yêu cầu ODBC driver. Cài đặt theo hệ điều hành:
+SQL Server requires an ODBC driver. Install according to your operating system:
 
 **Windows:**
-- Download từ [Microsoft](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
+- Download from [Microsoft](https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server)
 
 **macOS:**
 ```bash
-# Cài đặt unixODBC
+# Install unixODBC
 brew install unixodbc
 
-# Cài đặt Microsoft ODBC Driver
+# Install Microsoft ODBC Driver
 brew tap microsoft/mssql-release https://github.com/Microsoft/homebrew-mssql-release
 brew install msodbcsql17
 ```
 
 **Linux (Ubuntu/Debian):**
 ```bash
-# Cài đặt unixODBC
+# Install unixODBC
 sudo apt-get install unixodbc-dev
 
-# Cài đặt Microsoft ODBC Driver 17
+# Install Microsoft ODBC Driver 17
 curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
 curl https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list
 sudo apt-get update
 sudo ACCEPT_EULA=Y apt-get install -y msodbcsql17
 ```
 
-## Cấu hình
+## Configuration
 
-### 1. Tạo file .env
+### 1. Create a .env file
 
-Copy file `.env.example` thành `.env` và điền thông tin kết nối:
+Copy `.env.example` to `.env` and fill in your connection details:
 
 ```bash
 cp .env.example .env
 ```
 
-### 2. Cấu hình database connections
+### 2. Configure database connections
 
 #### Oracle
 ```env
@@ -109,27 +109,27 @@ MSSQL_DEV_DATABASE=your_database
 # Optional: MSSQL_DEV_DRIVER={ODBC Driver 18 for SQL Server}
 ```
 
-## Scripts sẵn có
+## Available Scripts
 
 ### 1. Search Schema Metadata
-Tìm kiếm tables và columns theo tên hoặc comment:
+Search for tables and columns by name or comment:
 
 ```bash
-# Tìm kiếm trong comments và names
+# Search in comments and names
 python scripts/search_schema.py --keyword "customer" --db DWH
 
-# Chỉ tìm trong comments
-python scripts/search_schema.py --keyword "khách hàng" --search-in comments --db DWH
+# Search only in comments
+python scripts/search_schema.py --keyword "customer" --search-in comments --db DWH
 
-# Tìm với regex
+# Search with regex
 python scripts/search_schema.py --keyword "CUST_|CUSTOMER_" --regex --db DWH
 
-# Lọc theo schema
+# Filter by schema
 python scripts/search_schema.py --keyword "revenue" --schema SALES --db DWH
 ```
 
 ### 2. Check Table Structure
-Kiểm tra cấu trúc table, indexes, partitions, và statistics:
+Check table structure, indexes, partitions, and statistics:
 
 ```bash
 # Oracle
@@ -138,166 +138,166 @@ python scripts/check_table.py OWNER TABLE_NAME --db DWH
 # SQL Server
 python scripts/check_table.py dbo Customers --db MSSQL_DEV
 
-# Xuất ra JSON
+# Output as JSON
 python scripts/check_table.py SCHEMA TABLE --db DWH --format json
 
-# Xuất ra Markdown
+# Output as Markdown
 python scripts/check_table.py SCHEMA TABLE --db DWH --format markdown
 ```
 
 ### 3. Run Query Safely
-Chạy SELECT queries với row limits và timeouts:
+Run SELECT queries with row limits and timeouts:
 
 ```bash
-# Chạy query từ string
+# Run query from string
 python scripts/run_query_safe.py --sql "SELECT * FROM SCHEMA.TABLE" --db DWH
 
-# Chạy query từ file
+# Run query from file
 python scripts/run_query_safe.py --file query.sql --db DWH --limit 50
 
-# Chỉ đếm số rows
+# Count rows only
 python scripts/run_query_safe.py --file query.sql --db DWH --count-only
 
-# Xuất ra JSON
+# Output as JSON
 python scripts/run_query_safe.py --file query.sql --db DWH --format json
 ```
 
 ### 4. EXPLAIN Plan Analysis
-Phân tích execution plan để tối ưu hóa performance:
+Analyze execution plans for performance optimization:
 
 ```bash
-# Chạy EXPLAIN trên query
+# Run EXPLAIN on a query
 python scripts/explain_query.py --file query.sql --db DWH
 
 # Oracle
 python scripts/explain_query.py --sql "SELECT * FROM TABLE" --db DWH
 
-# SQL Server (sử dụng SHOWPLAN)
+# SQL Server (using SHOWPLAN)
 python scripts/explain_query.py --file query.sql --db MSSQL_DEV
 
-# Xuất ra JSON
+# Output as JSON
 python scripts/explain_query.py --file query.sql --db DWH --format json
 ```
 
 ### 5. Find Relationships
-Tìm foreign keys và join paths:
+Find foreign keys and join paths:
 
 ```bash
-# Tìm relationships của 1 table
+# Find relationships for one table
 python scripts/find_relationships.py --schema SCHEMA --table TABLE_NAME --db DWH
 
-# Tìm join path giữa nhiều tables
+# Find join paths between multiple tables
 python scripts/find_relationships.py --schema SCHEMA --tables TABLE1,TABLE2,TABLE3 --db DWH
 ```
 
 ### 6. Sample Data
-Lấy sample data và profiling:
+Get sample data and profiling:
 
 ```bash
-# Lấy 10 rows sample
+# Get 10 sample rows
 python scripts/sample_data.py --schema SCHEMA --table TABLE_NAME --db DWH
 
-# Lấy 50 rows
+# Get 50 sample rows
 python scripts/sample_data.py --schema SCHEMA --table TABLE_NAME --db DWH --rows 50
 
-# Data profiling (phân tích phân phối dữ liệu)
+# Data profiling (analyze data distribution)
 python scripts/sample_data.py --schema SCHEMA --table TABLE_NAME --db DWH --profile
 ```
 
 ### 7. Search Documents
-Tìm kiếm trong Excel documentation (nếu có):
+Search in Excel documentation (if available):
 
 ```bash
-# Tìm trong folder documents/
+# Search in folder documents/
 python scripts/search_documents.py --keyword "customer" --folder documents/
 
-# Tìm với regex
+# Search with regex
 python scripts/search_documents.py --keyword "CUST|CUSTOMER" --folder documents/ --regex
 ```
 
-## Quy trình làm việc 7 giai đoạn
+## 7-Stage Workflow
 
-Khi sử dụng skill này với Claude, quy trình sẽ được thực hiện theo 7 giai đoạn:
+When using this skill with Claude, the workflow proceeds through 7 stages:
 
-1. **Requirement Analysis**: Phân tích yêu cầu kinh doanh
-2. **Data Discovery**: Tìm kiếm tables/columns phù hợp
-3. **Data Mapping**: Lập bản đồ dữ liệu và join conditions
-4. **Query Design**: Thiết kế query với CTEs và comments
-5. **Query Testing**: Test với EXPLAIN và safe execution
-6. **Optimization**: Tối ưu hóa dựa trên EXPLAIN plan
-7. **Documentation**: Lưu query và tài liệu
+1. **Requirement Analysis**: Analyze business requirements
+2. **Data Discovery**: Find relevant tables/columns
+3. **Data Mapping**: Map data and define join conditions
+4. **Query Design**: Design query with CTEs and comments
+5. **Query Testing**: Test with EXPLAIN and safe execution
+6. **Optimization**: Optimize based on EXPLAIN plan
+7. **Documentation**: Save query and documentation
 
 ### Checkpoints
 
-Workflow có 4 checkpoints để xác nhận với user:
-- **CP1**: Sau Requirement Analysis
-- **CP2**: Sau Data Discovery (xác nhận tables/columns)
-- **CP3**: Sau Data Mapping (xác nhận joins/filters)
-- **CP4**: Trước Query Testing (xác nhận query logic)
+The workflow has 4 checkpoints for user confirmation:
+- **CP1**: After Requirement Analysis
+- **CP2**: After Data Discovery (confirm tables/columns)
+- **CP3**: After Data Mapping (confirm joins/filters)
+- **CP4**: Before Query Testing (confirm query logic)
 
-Bạn có thể skip checkpoints bằng cách nói "skip checkpoints" hoặc "auto mode".
+You can skip checkpoints by saying "skip checkpoints" or "auto mode".
 
 ## Database-Specific Notes
 
 ### Oracle
-- Sử dụng `ROWNUM` cho pagination
-- Hỗ trợ `CONNECT BY` cho hierarchical queries
-- Partition pruning với `WHERE partition_key >= ...`
+- Use `ROWNUM` for pagination
+- Supports `CONNECT BY` for hierarchical queries
+- Partition pruning with `WHERE partition_key >= ...`
 
 ### MySQL
 - Case-insensitive string comparison (default)
-- Sử dụng `LIMIT` cho pagination
-- `GROUP_CONCAT` cho string aggregation
+- Use `LIMIT` for pagination
+- `GROUP_CONCAT` for string aggregation
 
 ### PostgreSQL
 - Case-sensitive string comparison (default)
-- Sử dụng `LIMIT` cho pagination
+- Use `LIMIT` for pagination
 - Native JSON/JSONB support
 
 ### SQL Server
-- Sử dụng `TOP` hoặc `OFFSET...FETCH NEXT` cho pagination
-- `STRING_AGG` cho string aggregation (SQL Server 2017+)
-- Extended properties cho table/column comments
+- Use `TOP` or `OFFSET...FETCH NEXT` for pagination
+- `STRING_AGG` for string aggregation (SQL Server 2017+)
+- Extended properties for table/column comments
 
 ## References
 
-Trong folder `references/` có các tài liệu tham khảo:
+In the `references/` folder, you can find reference documents:
 
-- `dialect-differences.md`: Khác biệt giữa Oracle, MySQL, PostgreSQL, SQL Server
-- `query-patterns.md`: Các pattern SQL phổ biến
-- `window-functions.md`: Hướng dẫn window functions
-- `optimization.md`: Kỹ thuật tối ưu hóa query
-- `database-design.md`: Thiết kế database
+- `dialect-differences.md`: Differences between Oracle, MySQL, PostgreSQL, SQL Server
+- `query-patterns.md`: Common SQL query patterns
+- `window-functions.md`: Guide to window functions
+- `optimization.md`: Query optimization techniques
+- `database-design.md`: Database design
 - `dwh-patterns.md`: Data warehouse patterns
 
 ## Troubleshooting
 
 ### SQL Server Connection Issues
 
-**Lỗi: "Can't open lib 'ODBC Driver 17 for SQL Server'"**
-- Cài đặt ODBC driver (xem phần yêu cầu hệ thống)
-- Hoặc chỉ định driver khác: `MSSQL_DEV_DRIVER={ODBC Driver 18 for SQL Server}`
+**Error: "Can't open lib 'ODBC Driver 17 for SQL Server'"**
+- Install the ODBC driver (see System Requirements)
+- Or specify a different driver: `MSSQL_DEV_DRIVER={ODBC Driver 18 for SQL Server}`
 
-**Lỗi: "Login failed for user"**
-- Kiểm tra username/password
-- Kiểm tra SQL Server Authentication mode (Windows Auth vs SQL Auth)
-- Đảm bảo user có quyền truy cập database
+**Error: "Login failed for user"**
+- Check username/password
+- Check SQL Server Authentication mode (Windows Auth vs SQL Auth)
+- Ensure user has privilege to access the database
 
-**Lỗi: "SSL Security error"**
-- Thêm `TrustServerCertificate=yes` vào connection string
-- Hoặc cấu hình SSL certificate đúng cách
+**Error: "SSL Security error"**
+- Add `TrustServerCertificate=yes` to the connection string
+- Or properly configure SSL certificate
 
 ### Oracle Connection Issues
 
-**Lỗi: "TNS:could not resolve the connect identifier"**
-- Kiểm tra DSN format: `hostname:port/service_name`
-- Kiểm tra tnsnames.ora nếu dùng alias
+**Error: "TNS:could not resolve the connect identifier"**
+- Check DSN format: `hostname:port/service_name`
+- Check tnsnames.ora if using alias
 
 ### MySQL Connection Issues
 
-**Lỗi: "Access denied for user"**
-- Kiểm tra username/password
-- Kiểm tra host access permissions: `GRANT ALL ON db.* TO 'user'@'host'`
+**Error: "Access denied for user"**
+- Check username/password
+- Check host access permissions: `GRANT ALL ON db.* TO 'user'@'host'`
 
 ## License
 
@@ -305,7 +305,7 @@ MIT
 
 ## Version History
 
-- **2.2.0**: Thêm hỗ trợ SQL Server
-- **2.1.0**: Cải thiện checkpoints và workflow
-- **2.0.0**: Thêm hỗ trợ PostgreSQL
-- **1.0.0**: Release đầu tiên với Oracle và MySQL
+- **2.2.0**: Added SQL Server support
+- **2.1.0**: Improved checkpoints and workflow
+- **2.0.0**: Added PostgreSQL support
+- **1.0.0**: Initial release with Oracle and MySQL
