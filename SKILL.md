@@ -551,7 +551,7 @@ Load detailed guidance based on context:
 
 **Alias usage (prefer by purpose):**
 - **DWH_ADMIN** — Use **only** for **procedure/package/function search and lineage**: finding PROCEDURE, PACKAGE, PACKAGE BODY, FUNCTION that reference tables or text. Prefer DWH_ADMIN over DWH when searching for code objects.
-- **DWH** — Use for **data extraction and analytics**: schema search, table inspection, sampling, relationships, EXPLAIN PLAN , and query execution.
+- **DWH** — Use only for **data extraction and analytics**: schema search, table inspection, sampling, relationships, EXPLAIN PLAN , and query execution.
 
 Connections configured via environment variables:
 ```
