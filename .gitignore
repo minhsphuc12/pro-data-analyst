@@ -12,6 +12,10 @@ queries/
 do-not-use-SKILL.txt
 SECURITY-CHECK.md
 **/.doc_cache/
+
+# Generated search/output files
+*_procedure_search.txt
+*_procedure_search.md
 # -----------------------------------------------------------------------------
 # Python
 # -----------------------------------------------------------------------------
