@@ -527,6 +527,10 @@ Load optimization reference: `references/optimization.md`
      Use when the task involved **business terms or KPIs** that you now understand better (definition, calculation, usage, or how they map to tables/columns).  
      **One term = one file.** File name: `{term-slug}.md` (e.g. `net-revenue.md`, `active-customer.md`).  
      Content to capture: business insight, how the term is used in reports, data understanding (which tables/columns, filters, edge cases), and gotchas. If a file for that term already exists, **read it first**, then **merge/append** the new learnings with date and task context. Same security rules as above: no real data samples, PII, or confidential detail — only structure, semantics, and generic placeholders.
+   
+   - **Other context-specific folders**  
+     When working on specialized cases (e.g. reconciliations, migration, lookup tables, reference data, or advanced analytics), also review and, if needed, update any other domain or use-case-specific folders that may exist in the repository (such as `knowledge/reconciliation/`, `knowledge/lookups/`, `knowledge/reference-tables/`, `knowledge/migration/`, or any team-adopted context folders).  
+     **General guidance:** Skill should systematically check for relevant folders/files with accumulated context for the current type of task, consult them before proceeding, and append new learnings per the established format (one object/file, clear headings, append with date and task). This helps maintain continuity and leverage past specialized work.
 
    **Security — knowledge base content:**  
    Do **NOT** write any of the following into output files (to avoid leaking sensitive company information, especially if these folders are ever committed or shared):
