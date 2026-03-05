@@ -97,7 +97,7 @@ After Phase 1 → **[CHECKPOINT 1]**; after Phase 2 → **[CHECKPOINT 2]**; afte
 Before touching any data, clearly define the problem and **enrich it with business glossary** so that Phase 2 data discovery is targeted and aligned with standard definitions.
 
 1. **Business question**: What is the user really asking? Restate it precisely.
-2. **Create task name**: Create single {task-name} for further usage, create folder {task-folder} = {YYYY-MM-DD}_{task-name}
+2. **Create task name**: Create single {task-name} for further usage, create folder `tasks/{task-folder}` where `{task-folder} = {YYYY-MM-DD}_{task-name}`
 3. **Output definition**: What should the result look like? (columns, rows, format)
 4. **Data modules**: Break into logical data domains (e.g., "customer data", "transaction data")
 5. **Data elements needed**: List specific measures (SUM, COUNT, AVG) and dimensions (GROUP BY)
@@ -116,7 +116,7 @@ Before touching any data, clearly define the problem and **enrich it with busine
    Enrich the task brief with these so the problem is stated in business language and Phase 2 discovery is more effective.
 8. **Consult accumulated knowledge glossary**:  
    For the same key terms and KPIs, check the **accumulated knowledge glossary** in `knowledge/glossary/`. There is **one file per term** (e.g. `{term-slug}.md`). Each file holds learned insight about that term: business context, usage in reports, how the data is understood in practice, gotchas, and references to tables/columns from past tasks. If a file exists for a term, **read it** and merge relevant points into the task brief so the brief benefits from prior sessions. This step runs after the formal business glossary so definitions stay aligned with standards while the brief is enriched with accumulated experience.
-9. **Save brief**: Create folder `{task-folder}/` and file `{task-folder}-brief.md` inside it (e.g. `2025-02-22_revenue-by-region/2025-02-22_revenue-by-region-brief.md`). Always use date prefix **{YYYY-MM-DD}_** for task-related files and folders so they are naturally sorted and navigated easily.
+9. **Save brief**: Create folder `tasks/{task-folder}/` and file `{task-folder}-brief.md` inside it (e.g. `tasks/2025-02-22_revenue-by-region/2025-02-22_revenue-by-region-brief.md`). Always use date prefix **{YYYY-MM-DD}_** for task-related files and folders so they are naturally sorted and navigated easily.
 
 **Template for brief:**
 
@@ -302,7 +302,7 @@ Key Columns Identified:
 
 ### Phase 3: Data Mapping & Documentation
 
-Create `{task-folder}/{task-folder}-data-mapping.md` in working directory (same dated task folder as Phase 1 brief), documenting everything found:
+Create `tasks/{task-folder}/{task-folder}-data-mapping.md` in working directory (same dated task folder as Phase 1 brief), documenting everything found:
 
 ```markdown
 # Data Mapping: {task name}
@@ -402,7 +402,7 @@ SELECT ...
 FROM step2
 ORDER BY ...;
 ```
-Save query to `{task-folder}/{task-folder}_query.sql`
+Save query to `tasks/{task-folder}/{task-folder}_query.sql`
  - Include standard header comment (purpose, author, date, tables, performance notes)
 
 **[CHECKPOINT 4] — Confirm Query Logic Before Testing**
@@ -497,7 +497,7 @@ Load optimization reference: `references/optimization.md`
 1. **Save query** to `queries/agent-written/{task-folder}.sql`
    - Include standard header comment (purpose, author, date, tables, performance notes)
 
-2. **Update data mapping** document (`{task-folder}/{task-folder}-data-mapping.md`) with final results
+2. **Update data mapping** document (`tasks/{task-folder}/{task-folder}-data-mapping.md`) with final results
 
 3. **Session knowledge distillation** (when the job finishes successfully):  
    Distil what you learned in this session and persist it into the knowledge-base files below.  
@@ -543,7 +543,7 @@ Load optimization reference: `references/optimization.md`
 
    When describing "sample value patterns" or "data quality", stick to **structure and semantics** (e.g. "column allows NULL; distinct values observed: status-like codes") rather than dumping real values. If the task revealed sensitive context, record only **what is needed for future queries** (e.g. join key names, filter column names, data types) and omit the sensitive detail.
 
-4. **Report to user** with a task report name `{task-folder}_README.md` in task folder:
+4. **Report to user** with a task report name `tasks/{task-folder}/{task-folder}_README.md` in task folder:
    - Use 7 phases structure 
    - Summarize outcome and generated files of every phases done by this skill 
    - Key tables and columns used (with business meaning)
@@ -612,7 +612,7 @@ Default alias: `DWH` (Oracle datawarehouse)
 
 ## Folder Structure
 
-**Task naming convention:** Any file or folder created per task name **must** use a date prefix `{YYYY-MM-DD}_` to ensure easy sorting and look-up (e.g., `2025-02-22_revenue-by-region/`, `2025-02-22_revenue-by-region-brief.md`).
+**Task naming convention:** Any file or folder created per task name **must** use a date prefix `{YYYY-MM-DD}_` to ensure easy sorting and look-up (e.g., `tasks/2025-02-22_revenue-by-region/`, `tasks/2025-02-22_revenue-by-region-brief.md`).
 
 ```
 documents/      -> Excel metadata (DWH + source systems). Usage standard:
@@ -624,6 +624,7 @@ queries/        -> Existing SQL queries (reference for patterns)
 queries/agent-written/  -> Output: queries written by this agent (naming: {task-folder}.sql)
 references/     -> SQL and DWH reference guides
 scripts/        -> Python tools for database inspection and query testing
+tasks/          -> Per-task working folders. Each task folder is named `{YYYY-MM-DD}_{task-name}/` and lives under this directory.
 knowledge/glossary/       -> Accumulated knowledge per **business term**: one file per term (e.g. {term-slug}.md). Content: business insight, usage in reports, data understanding, gotchas, and references to tables/columns from past tasks. **Consult in Phase 1** after the formal business glossary to enrich the brief with prior experience.
 knowledge/single-table/   -> Knowledge base: one file per table. Naming: {source_db}_{schema}_{table}.md. Accumulate learnings across sessions. **Consult at the start of a new task** for relevant tables.
 knowledge/multiple-tables/ -> Knowledge base: one file per set of joined tables. Naming: {source_db}_{table1}_{table2}[_{table3}…].md. Accumulate learnings across sessions. **Consult at the start of a new task** for relevant joins.
@@ -638,7 +639,7 @@ knowledge/multiple-tables/ -> Knowledge base: one file per set of joined tables.
 - Incorporate user feedback / domain knowledge when provided at checkpoints
 - Re-present and re-confirm if user corrections are significant
 - Create task brief before data discovery (Phase 1)
-- Use date prefix **{YYYY-MM-DD}_** for any file or folder named with task-name (e.g. `{YYYY-MM-DD}_{task-name}/`, `{YYYY-MM-DD}_{task-name}-brief.md`) so outputs are easy to sort and find
+- Use date prefix **{YYYY-MM-DD}_** for any file or folder named with task-name (e.g. `tasks/{YYYY-MM-DD}_{task-name}/`, `tasks/{YYYY-MM-DD}_{task-name}-brief.md`) so outputs are easy to sort and find
 - In Phase 1, consult business glossary for key terms/KPIs to enrich the brief (definitions, calculation, DWH candidates); then consult accumulated knowledge glossary (`knowledge/glossary/`: one file per term — business insight, usage, data understanding) and merge relevant points into the brief before Phase 2
 - **Before discover data**: Consult the knowledge folders (`single-table/`, `multiple-tables/`) for accumulated data understanding from previous tasks — check for files matching tables/joins relevant to the task and load them for context before Phase 2.
 - Search BOTH documents/ (DWH + source docs when relevant) AND database metadata for data discovery (Phase 2); when tables or joins are in scope, load matching knowledge files from `single-table/` and `multiple-tables/` if they exist.
