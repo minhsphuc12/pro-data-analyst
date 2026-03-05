@@ -281,7 +281,7 @@ In the `references/` folder, you can find reference documents:
 **Error: "Login failed for user"**
 - Check username/password
 - Check SQL Server Authentication mode (Windows Auth vs SQL Auth)
-- Ensure user has privilege to access the database
+- Ensure user has privileges to access the database
 
 **Error: "SSL Security error"**
 - Add `TrustServerCertificate=yes` to the connection string
