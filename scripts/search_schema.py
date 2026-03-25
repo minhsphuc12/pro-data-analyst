@@ -123,6 +123,22 @@ def _oracle_search(cursor, keyword: str, schema: str | None,
 # MySQL
 # ============================================================================
 
+def _mysql_current_database(cursor) -> str | None:
+    """
+    Return the currently selected database for this MySQL session, if any.
+    If connection was created without a default database, this returns None.
+    """
+    try:
+        cursor.execute("SELECT DATABASE()")
+        row = cursor.fetchone()
+        if not row:
+            return None
+        db = row[0]
+        return str(db) if db else None
+    except Exception:
+        return None
+
+
 def _mysql_search(cursor, keyword: str, schema: str | None,
                   search_in: list[str], use_regex: bool, limit: int) -> list[dict]:
     results = []
@@ -137,9 +153,13 @@ def _mysql_search(cursor, keyword: str, schema: str | None,
         WHERE 1=1
     """
     params = []
-    if schema:
+    # By default, restrict search to the currently selected database from the connection.
+    # This matches the expectation that {ALIAS}_DATABASE in env scopes metadata queries.
+    effective_schema = schema or _mysql_current_database(cursor)
+
+    if effective_schema:
         sql += " AND c.TABLE_SCHEMA = %s"
-        params.append(schema)
+        params.append(effective_schema)
 
     sql += " ORDER BY c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION"
     cursor.execute(sql, params or None)
