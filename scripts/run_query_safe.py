@@ -15,10 +15,12 @@ Usage:
 """
 
 import argparse
+import csv
 import json
 import sys
 import os
 import time
+import io
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from db_connector import get_connection, get_db_type, is_select_only, safe_execute
@@ -205,6 +207,33 @@ def format_markdown(result: dict) -> str:
     return "\n".join(lines)
 
 
+def format_csv(result: dict) -> str:
+    columns = result.get("columns", [])
+    rows = result.get("rows", [])
+
+    buf = io.StringIO(newline="")
+    writer = csv.writer(buf)
+    if columns:
+        writer.writerow(columns)
+    for row in rows:
+        writer.writerow(["" if v is None else v for v in row])
+
+    return buf.getvalue()
+
+
+def write_csv_file(result: dict, output_path: str, encoding: str = "utf-8-sig") -> None:
+    columns = result.get("columns", [])
+    rows = result.get("rows", [])
+
+    os.makedirs(os.path.dirname(os.path.abspath(output_path)) or ".", exist_ok=True)
+    with open(output_path, "w", encoding=encoding, newline="") as f:
+        writer = csv.writer(f)
+        if columns:
+            writer.writerow(columns)
+        for row in rows:
+            writer.writerow(["" if v is None else v for v in row])
+
+
 # ============================================================================
 # CLI
 # ============================================================================
@@ -218,7 +247,8 @@ if __name__ == "__main__":
     parser.add_argument("--limit", type=int, default=100, help="Row limit (default: 100)")
     parser.add_argument("--timeout", type=int, default=30, help="Timeout in seconds (default: 30)")
     parser.add_argument("--count-only", action="store_true", help="Only return total row count")
-    parser.add_argument("--format", choices=["text", "json", "markdown"], default="text")
+    parser.add_argument("--format", choices=["text", "json", "markdown", "csv"], default="text")
+    parser.add_argument("--output", "-o", default=None, help="Write output to a file (for json/markdown/csv)")
     args = parser.parse_args()
 
     sql = args.sql
@@ -231,12 +261,38 @@ if __name__ == "__main__":
             sql, db_alias=args.db, row_limit=args.limit,
             timeout_seconds=args.timeout, count_only=args.count_only,
         )
-        if args.format == "json":
-            print(format_json(result))
+        if args.format == "csv":
+            if args.output:
+                write_csv_file(result, args.output, encoding="utf-8-sig")
+                print(f"Wrote CSV to: {args.output}")
+            else:
+                print(format_csv(result), end="")
+        elif args.format == "json":
+            out = format_json(result)
+            if args.output:
+                os.makedirs(os.path.dirname(os.path.abspath(args.output)) or ".", exist_ok=True)
+                with open(args.output, "w", encoding="utf-8", newline="") as f:
+                    f.write(out)
+                print(f"Wrote JSON to: {args.output}")
+            else:
+                print(out)
         elif args.format == "markdown":
-            print(format_markdown(result))
+            out = format_markdown(result)
+            if args.output:
+                os.makedirs(os.path.dirname(os.path.abspath(args.output)) or ".", exist_ok=True)
+                with open(args.output, "w", encoding="utf-8", newline="") as f:
+                    f.write(out)
+                print(f"Wrote Markdown to: {args.output}")
+            else:
+                print(out)
         else:
-            print(format_text(result))
+            if args.output:
+                os.makedirs(os.path.dirname(os.path.abspath(args.output)) or ".", exist_ok=True)
+                with open(args.output, "w", encoding="utf-8", newline="") as f:
+                    f.write(format_text(result))
+                print(f"Wrote text to: {args.output}")
+            else:
+                print(format_text(result))
     except Exception as e:
         print(f"Lỗi: {e}", file=sys.stderr)
         import traceback
